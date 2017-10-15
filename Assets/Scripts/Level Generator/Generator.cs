@@ -16,6 +16,7 @@ public class Generator : MonoBehaviour
     private void Start()
     {
         GenerateLevel();
+        AddPlayer();
     }
 
 
@@ -44,8 +45,7 @@ public class Generator : MonoBehaviour
     {
         for(int i = 0; i < levelLength; i++)
         {
-            if (levelPlatforms.Count > 0)
-                lastPlatformIdx = levelPlatforms.Count - 1;
+            lastPlatformIdx = levelPlatforms.Count - 1;
 
             // Place the starting platform.
             if (i == 0)
@@ -54,16 +54,23 @@ public class Generator : MonoBehaviour
                 continue;
             }
 
-            string[] nextPlatformOptions = Rules.NextPlatform(levelPlatforms[lastPlatformIdx].GetComponent<Platform>().GetPlatformType());
 
+            // Get a list of the possible next moves
+            string lastPlatformType = levelPlatforms[lastPlatformIdx].GetComponent<Platform>().GetPlatformType();
+            string[] nextPlatformOptions = Rules.NextPlatform(lastPlatformType);
+
+            Debug.Log("Display options based on last type (" + lastPlatformType + ")");
             foreach (var option in nextPlatformOptions)
             {
                 Debug.Log(option);
             }
 
-            Debug.Log("Random number min (" + 0 + "), max  (" + (nextPlatformOptions.Length - 1) + ")");
 
             int randomPick = Random.Range(0, nextPlatformOptions.Length);
+
+            Debug.Log("Random number min (" + 0 + "), max  (" + nextPlatformOptions.Length + ")");
+            Debug.Log("Random choice: " + randomPick);
+
 
             AddPlatform(nextPlatformOptions[randomPick]);
         }
@@ -75,6 +82,7 @@ public class Generator : MonoBehaviour
         GameObject newPlatform;
         Vector3    newPosition;
 
+        
 
         // If this is the first platform place it at the beginning. 
         if (levelPlatforms.Count <= 0)
@@ -87,7 +95,7 @@ public class Generator : MonoBehaviour
         {
             GameObject lastPlatform = levelPlatforms[lastPlatformIdx];
 
-            Debug.Log("Setting position values for platform at index " + lastPlatformIdx);
+            Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
             newPosition.x = lastPlatform.transform.position.x + lastPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
             newPosition.z = lastPlatform.transform.position.z;
         }
@@ -109,17 +117,22 @@ public class Generator : MonoBehaviour
             case "Bottom":
                 newPlatform.AddComponent<BottomPlatform>();
                 break;
-
-            default:
-                Debug.Log("ERROR: Last Platform name (" + type + ") is invalid.");
-                break;
         }
+        // Set the platforms Y value.
         newPosition.y = newPlatform.GetComponent<Platform>().GetHeight();
         newPlatform.transform.position = new Vector3(newPosition.x, newPosition.y, newPosition.z);
-
         Debug.Log("Full vec position for new " + newPlatform.GetComponent<Platform>().GetPlatformType() + " platform "  + newPosition);
 
+
         levelPlatforms.Add(newPlatform);
+
+        Debug.Log(type + " platform has been added to the list");
+    }
+
+
+    private void AddPlayer()
+    {
+        
     }
 
 }
