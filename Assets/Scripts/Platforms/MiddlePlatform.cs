@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class MiddlePlatform : Platform
 {
     public override float GetHeight()

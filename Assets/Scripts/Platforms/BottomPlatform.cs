@@ -12,6 +12,6 @@ public class BottomPlatform : Platform
 
     public override string GetPlatformType()
     {
-        return "Top";
+        return "Bottom";
     }
 }

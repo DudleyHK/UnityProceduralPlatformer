@@ -6,6 +6,7 @@ public class Generator : MonoBehaviour
 {
     public List<GameObject> levelPlatforms = new List<GameObject>();
     public GameObject platformPrefab;
+    public GameObject playerPrefab;
     public int lastPlatformIdx = 0;
     public ushort levelLength = 5;
     public string startingPlatform = "Middle";
@@ -15,8 +16,7 @@ public class Generator : MonoBehaviour
 
     private void Start()
     {
-        GenerateLevel();
-        AddPlayer();
+        Regenerate();
     }
 
 
@@ -37,6 +37,7 @@ public class Generator : MonoBehaviour
         }
         levelPlatforms.Clear();
         GenerateLevel();
+        AddPlayer();
     }
 
 
@@ -132,7 +133,14 @@ public class Generator : MonoBehaviour
 
     private void AddPlayer()
     {
-        
+        float yOffset = levelPlatforms[0].transform.lossyScale.y + (playerPrefab.transform.lossyScale.y / 2);
+
+        float x = levelPlatforms[0].transform.position.x;
+        float y = levelPlatforms[0].transform.position.y + yOffset;
+        float z = levelPlatforms[2].transform.position.z;
+
+
+        GameObject playerClone = Instantiate(playerPrefab, new Vector3(x, y, z), Quaternion.identity);
     }
 
 }
