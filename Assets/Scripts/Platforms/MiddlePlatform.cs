@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class MiddlePlatform : Platform
 {
-    public override float GetHeight()
+    public override float GetHeight(GameObject lastPlatform)
     {
-        return 0f;
+        return lastPlatform.transform.position.y;
     }
 
     public override string GetPlatformType()

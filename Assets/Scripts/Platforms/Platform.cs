@@ -11,11 +11,15 @@ using UnityEngine;
 
 public class Platform : MonoBehaviour
 {
-    public virtual float GetHeight()
+    /// <summary>
+    /// Use the lastPlatforms y position to calculate the new height.
+    /// </summary>
+    /// <param name="lastPlatform"></param>
+    /// <returns></returns>
+    public virtual float GetHeight(GameObject lastPlatform)
     {
         return 0f;
     }
-
 
     public virtual string GetPlatformType()
     {

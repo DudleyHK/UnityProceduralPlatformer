@@ -11,6 +11,8 @@ public class Generator : MonoBehaviour
     public ushort levelLength = 5;
     public string startingPlatform = "Middle";
 
+    private GameObject playerClone;
+
 
 
 
@@ -36,6 +38,8 @@ public class Generator : MonoBehaviour
             Destroy(platform);
         }
         levelPlatforms.Clear();
+        Destroy(playerClone);
+
         GenerateLevel();
         AddPlayer();
     }
@@ -60,17 +64,16 @@ public class Generator : MonoBehaviour
             string lastPlatformType = levelPlatforms[lastPlatformIdx].GetComponent<Platform>().GetPlatformType();
             string[] nextPlatformOptions = Rules.NextPlatform(lastPlatformType);
 
-            Debug.Log("Display options based on last type (" + lastPlatformType + ")");
-            foreach (var option in nextPlatformOptions)
-            {
-                Debug.Log(option);
-            }
-
+            //Debug.Log("Display options based on last type (" + lastPlatformType + ")");
+            //foreach (var option in nextPlatformOptions)
+            // {
+            //     Debug.Log(option);
+            // }
 
             int randomPick = Random.Range(0, nextPlatformOptions.Length);
 
-            Debug.Log("Random number min (" + 0 + "), max  (" + nextPlatformOptions.Length + ")");
-            Debug.Log("Random choice: " + randomPick);
+            //Debug.Log("Random number min (" + 0 + "), max  (" + nextPlatformOptions.Length + ")");
+            //Debug.Log("Random choice: " + randomPick);
 
 
             AddPlatform(nextPlatformOptions[randomPick]);
@@ -81,25 +84,9 @@ public class Generator : MonoBehaviour
     private void AddPlatform(string type)
     {
         GameObject newPlatform;
+        GameObject lastPlatform = default(GameObject);
         Vector3    newPosition;
 
-        
-
-        // If this is the first platform place it at the beginning. 
-        if (levelPlatforms.Count <= 0)
-        {
-            Debug.Log("Setting position values for the first platform");
-            newPosition.x = 0f;
-            newPosition.z = 0f;
-        }
-        else
-        {
-            GameObject lastPlatform = levelPlatforms[lastPlatformIdx];
-
-            Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
-            newPosition.x = lastPlatform.transform.position.x + lastPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
-            newPosition.z = lastPlatform.transform.position.z;
-        }
 
         // Create the new platform
         newPlatform = Instantiate(platformPrefab);
@@ -119,15 +106,32 @@ public class Generator : MonoBehaviour
                 newPlatform.AddComponent<BottomPlatform>();
                 break;
         }
-        // Set the platforms Y value.
-        newPosition.y = newPlatform.GetComponent<Platform>().GetHeight();
+
+
+        // If this is the first platform place it at the beginning. 
+        if (levelPlatforms.Count <= 0)
+        {
+            Debug.Log("Setting position values for the first platform");
+            newPosition.x = 0f;
+            newPosition.y = 0f;
+            newPosition.z = 0f;
+        }
+        else
+        {
+            lastPlatform = levelPlatforms[lastPlatformIdx];
+
+            Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
+            newPosition.x = lastPlatform.transform.position.x + lastPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
+            newPosition.y = newPlatform.GetComponent<Platform>().GetHeight(lastPlatform);
+            newPosition.z = lastPlatform.transform.position.z;
+        }
+        
+       
         newPlatform.transform.position = new Vector3(newPosition.x, newPosition.y, newPosition.z);
-        Debug.Log("Full vec position for new " + newPlatform.GetComponent<Platform>().GetPlatformType() + " platform "  + newPosition);
-
-
         levelPlatforms.Add(newPlatform);
 
-        Debug.Log(type + " platform has been added to the list");
+        //Debug.Log("Full vec position for new " + newPlatform.GetComponent<Platform>().GetPlatformType() + " platform "  + newPosition);
+        //Debug.Log(type + " platform has been added to the list");
     }
 
 
@@ -140,7 +144,7 @@ public class Generator : MonoBehaviour
         float z = levelPlatforms[2].transform.position.z;
 
 
-        GameObject playerClone = Instantiate(playerPrefab, new Vector3(x, y, z), Quaternion.identity);
+        playerClone = Instantiate(playerPrefab, new Vector3(x, y, z), Quaternion.identity);
     }
 
 }
