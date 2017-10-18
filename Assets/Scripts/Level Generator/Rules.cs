@@ -10,7 +10,7 @@ public class Rules : ScriptableObject
     {
         switch(lastType)
         {
-            case "Top":     return new string[] { "Middle", "Top"};
+            case "Top":     return new string[] { "Middle", "Top", "High Top"};
 
             case "Middle":  return new string[] { "Top", "Middle", "Bottom" };
 
@@ -20,7 +20,6 @@ public class Rules : ScriptableObject
                 Debug.Log("ERROR: Last Platform name (" + lastType + ") is invalid.");
                 break;
         }
-        // Output Middle if there is an error.
-        return new string[] { "Middle" };
+        return null;
     }
 }

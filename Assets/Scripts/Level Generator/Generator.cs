@@ -62,21 +62,44 @@ public class Generator : MonoBehaviour
 
             // Get a list of the possible next moves
             string lastPlatformType = levelPlatforms[lastPlatformIdx].GetComponent<Platform>().GetPlatformType();
-            string[] nextPlatformOptions = Rules.NextPlatform(lastPlatformType);
-
+            string[] nextPlatformOptions;
+            if (lastPlatformType == "High Top")
+            {
+                nextPlatformOptions = Rules.NextPlatform("Middle");
+            }
+            else
+            {
+                nextPlatformOptions = Rules.NextPlatform(lastPlatformType);
+            }
             //Debug.Log("Display options based on last type (" + lastPlatformType + ")");
             //foreach (var option in nextPlatformOptions)
-            // {
-            //     Debug.Log(option);
-            // }
+            //{
+            //    Debug.Log(option);
+            //}
 
             int randomPick = Random.Range(0, nextPlatformOptions.Length);
+            string currentPlatformType = nextPlatformOptions[randomPick];
 
             //Debug.Log("Random number min (" + 0 + "), max  (" + nextPlatformOptions.Length + ")");
             //Debug.Log("Random choice: " + randomPick);
 
+            if (lastPlatformType == "Top" && currentPlatformType == "Middle")
+            {
+                int flipCoin = Random.Range(0, 1);
+                if (flipCoin == 1)
+                {
+                    AddUnlistedPlatform("High Top");
+                }
+                AddPlatform("Middle");
 
-            AddPlatform(nextPlatformOptions[randomPick]);
+
+            }
+            else
+            {
+                AddPlatform(currentPlatformType);
+            }
+
+            
         }
     }
 
@@ -84,7 +107,6 @@ public class Generator : MonoBehaviour
     private void AddPlatform(string type)
     {
         GameObject newPlatform;
-        GameObject lastPlatform = default(GameObject);
         Vector3    newPosition;
 
 
@@ -94,6 +116,10 @@ public class Generator : MonoBehaviour
         // Assign Platform correct type
         switch (type)
         {
+            case "High Top":
+                newPlatform.AddComponent<HighTopPlatform>();
+                break;
+
             case "Top":
                 newPlatform.AddComponent<TopPlatform>();
                 break;
@@ -111,27 +137,67 @@ public class Generator : MonoBehaviour
         // If this is the first platform place it at the beginning. 
         if (levelPlatforms.Count <= 0)
         {
-            Debug.Log("Setting position values for the first platform");
+           // Debug.Log("Setting position values for the first platform");
             newPosition.x = 0f;
             newPosition.y = 0f;
             newPosition.z = 0f;
         }
         else
         {
-            lastPlatform = levelPlatforms[lastPlatformIdx];
+            GameObject lastPlatform = levelPlatforms[lastPlatformIdx];
 
-            Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
+           // Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
             newPosition.x = lastPlatform.transform.position.x + lastPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
-            newPosition.y = newPlatform.GetComponent<Platform>().GetHeight(lastPlatform);
+            newPosition.y = newPlatform.GetComponent<Platform>().GetHeight();
             newPosition.z = lastPlatform.transform.position.z;
         }
         
-       
         newPlatform.transform.position = new Vector3(newPosition.x, newPosition.y, newPosition.z);
         levelPlatforms.Add(newPlatform);
 
         //Debug.Log("Full vec position for new " + newPlatform.GetComponent<Platform>().GetPlatformType() + " platform "  + newPosition);
         //Debug.Log(type + " platform has been added to the list");
+    }
+
+
+    private void AddUnlistedPlatform(string type)
+    {
+        GameObject newPlatform;
+        Vector3 newPosition;
+
+
+        // Create the new platform
+        newPlatform = Instantiate(platformPrefab);
+
+        // Assign Platform correct type
+        switch (type)
+        {
+            case "High Top":
+                newPlatform.AddComponent<HighTopPlatform>();
+                break;
+
+            case "Top":
+                newPlatform.AddComponent<TopPlatform>();
+                break;
+
+            case "Middle":
+                newPlatform.AddComponent<MiddlePlatform>();
+                break;
+
+            case "Bottom":
+                newPlatform.AddComponent<BottomPlatform>();
+                break;
+        }
+
+        GameObject lastPlatform = levelPlatforms[lastPlatformIdx];
+
+        // Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
+        newPosition.x = lastPlatform.transform.position.x + lastPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
+        newPosition.y = newPlatform.GetComponent<Platform>().GetHeight();
+        newPosition.z = lastPlatform.transform.position.z;
+
+        newPlatform.transform.position = new Vector3(newPosition.x, newPosition.y, newPosition.z);
+
     }
 
 

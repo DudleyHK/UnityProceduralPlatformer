@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public class MiddlePlatform : Platform
+public class HighTopPlatform : Platform
 {
     public override float GetHeight()
     {
-        return 0f;
+        return PlayerMetrics.jumpHeight * 2;
     }
 
     public override string GetPlatformType()
     {
-        return "Middle";
+        return "High Top";
     }
 }

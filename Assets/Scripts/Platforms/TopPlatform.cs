@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class TopPlatform : Platform
 {
-    public override float GetHeight(GameObject lastPlatform)
+    public override float GetHeight()
     {
-        return lastPlatform.transform.position.y + PlayerMetrics.jumpHeight;
+        return PlayerMetrics.jumpHeight;
     }
 
     public override string GetPlatformType()
