@@ -12,17 +12,25 @@ using UnityEngine;
 public class LockableZone : Zone
 {
     public GameObject rewardZone;
+    public GameObject thresholdZone;
+    public GameObject generator;
 
-    public bool  isLocked   { get; set; }
+    public bool isLocked = false;
 
 
 
-    private void Start()
+    public void IdentifyZoneFriends()
     {
-        var findObject = FindObjectOfType<RewardZone>();
-        if(findObject)
+        var findRewardZone = GameObject.Find("Reward Zone");
+        if(findRewardZone)
         {
-            rewardZone = findObject.gameObject;
+            rewardZone = findRewardZone.gameObject;
+        }
+
+        var findGeneratorObject = FindObjectOfType<Generator>();
+        if (findGeneratorObject)
+        {
+            generator = findGeneratorObject.gameObject;
         }
     }
 
@@ -32,15 +40,16 @@ public class LockableZone : Zone
     {
         if (other.gameObject.tag == "Player")
         {
-
             if (!isLocked && rewardZone.GetComponent<RewardZone>().isRewarded)
             {
                 // Game won
+                generator.GetComponent<Generator>().Regenerate(); 
             }
-            else
+            else if(thresholdZone.GetComponent<ThresholdZone>().isHit && !rewardZone.GetComponent<RewardZone>().isRewarded)
             {
                 // kill player
-                // return;
+                Destroy(other.gameObject);
+                return;
             }
         }
     }

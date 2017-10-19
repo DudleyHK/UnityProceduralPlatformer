@@ -1,15 +1,18 @@
 ﻿using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Generator : MonoBehaviour
 {
     public List<GameObject> generatedZones = new List<GameObject>();
+    public List<GameObject> previousPlatforms = new List<GameObject>();
     public GameObject zonePrefab;
     public GameObject playerPrefab;
     public ushort totalActs = 4;
 
     private GameObject playerClone;
+
 
 
     public enum Acts
@@ -39,14 +42,14 @@ public class Generator : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             Regenerate();
         }
     }
 
 
-    private void Regenerate()
+    public void Regenerate()
     {
         foreach (var zone in generatedZones)
         {
@@ -55,234 +58,186 @@ public class Generator : MonoBehaviour
         generatedZones.Clear();
         Destroy(playerClone);
 
-        HerosJourney();
+        GenerateLevel();
+        AddZoneTypeFriends();
+
         AddPlayer();
     }
 
 
-
-
-
-    private void HerosJourney()
+    private void GenerateLevel()
     {
-        for(int act = 0; act < totalActs; act++)
+        // Place the first platform
+        float[] firstPlatformPositions = Rules.AllOfType("Little Layer");
+        int randomPick1 = Random.Range(0, firstPlatformPositions.Length);
+        float firstPlatformPosition = firstPlatformPositions[randomPick1];
+
+        GameObject firstPlatform = Instantiate(zonePrefab, new Vector3(0, firstPlatformPosition, 0), Quaternion.identity);
+        firstPlatform.AddComponent<LockableZone>().layer = Rules.PlatformName("Little Layer", firstPlatformPosition);
+        firstPlatform.name = "Lockable Zone";
+        generatedZones.Add(firstPlatform);
+
+
+        // Place second lot of platforms.
+        int numberOfPlatformsToGenerate = Random.Range(2, 3);
+        List<float> secondPlatformsPositions = new List<float>(Rules.Options("Little Layer", firstPlatform.GetComponent<Zone>().layer));
+        Vector3 newPosition;
+
+        bool thresholdMade = false;
+
+        for (int i = 0; i < numberOfPlatformsToGenerate; i++)
         {
-            if (act == 0)
+            int randomPick2 = Random.Range(0, secondPlatformsPositions.Count);
+
+            newPosition.x = firstPlatform.transform.position.x + firstPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
+            newPosition.y = secondPlatformsPositions[randomPick2];
+            newPosition.z = firstPlatform.transform.position.z;
+
+            GameObject layerTwoPlatform = Instantiate(zonePrefab, newPosition, Quaternion.identity);
+
+            if (!thresholdMade)
             {
-                //AddZone(actList[act]);
-                continue;
+                layerTwoPlatform.AddComponent<ThresholdZone>().layer = Rules.PlatformName("Big Layer", secondPlatformsPositions[randomPick2]);
+                layerTwoPlatform.name = "Threshold Zone";
+                thresholdMade = true;
+            }
+            else
+            {
+                layerTwoPlatform.AddComponent<Zone>().layer = Rules.PlatformName("Big Layer", secondPlatformsPositions[randomPick2]);
             }
 
 
 
+            secondPlatformsPositions.RemoveAt(randomPick2);
+            generatedZones.Add(layerTwoPlatform);
+            previousPlatforms.Add(layerTwoPlatform);
         }
+
+
+        // Place third layer
+        List<GameObject> thirdLayerPlatforms = ThirdLayer();
+
+
+        // Place the final platform
+        int randomPick4 = Random.Range(0, thirdLayerPlatforms.Count);
+        // Debug.Log("Number of third layer platforms " + thirdLayerPlatforms.Count);
+        // Debug.Log("Random Pick value: " + randomPick4);
+
+
+        GameObject thirdLayerPlatformToGenerateFrom = thirdLayerPlatforms[randomPick4];
+        List<float> fourthPlatformsPositions = new List<float>(Rules.Options("Little Layer", thirdLayerPlatformToGenerateFrom.GetComponent<Zone>().layer));
+
+        int randomHeight = Random.Range(0, fourthPlatformsPositions.Count);
+
+        newPosition.x = thirdLayerPlatformToGenerateFrom.transform.position.x + thirdLayerPlatformToGenerateFrom.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
+        newPosition.y = fourthPlatformsPositions[randomHeight];
+        newPosition.z = thirdLayerPlatformToGenerateFrom.transform.position.z;
+
+        GameObject layerFourPlatform = Instantiate(zonePrefab, newPosition, Quaternion.identity);
+        layerFourPlatform.name = "Reward Zone";
+        layerFourPlatform.AddComponent<RewardZone>().layer = Rules.PlatformName("Big Layer", fourthPlatformsPositions[randomHeight]);
+
+        generatedZones.Add(layerFourPlatform);
+
     }
 
 
-    private void AddZone(string layer, Acts act)
+
+    private void AddZoneTypeFriends()
     {
-        Vector3 zonePosition = Vector3.zero;
+        GameObject lockableZone  = default(GameObject);
+        GameObject rewardZone    = default(GameObject);
+        GameObject thresholdZone = default(GameObject);
 
-        GameObject newZone = Instantiate(zonePrefab, Vector3.zero, Quaternion.identity);
-        newZone.GetComponent<Zone>().layer = layer;
-
-
-        if (act == Acts.CallToAdventure)
+        foreach (var zone in generatedZones)
         {
-            newZone.AddComponent<LockableZone>();
+            if (zone.name == "Lockable Zone")
+            {
+                lockableZone = zone;
+            }
+            else if (zone.name == "Threshold Zone")
+            {
+                thresholdZone = zone;
+            }
+            else if (zone.name == "Reward Zone")
+            {
+                rewardZone = zone;
+            }
+            else
+            {
 
-            zonePosition.x = 0f;
-            zonePosition.z = 0f;
+            }
         }
 
-        // Assign Platform correct type
-        switch (layer)
-        {
+        lockableZone.GetComponent<LockableZone>().rewardZone    = rewardZone;
+        lockableZone.GetComponent<LockableZone>().thresholdZone = thresholdZone;
+        lockableZone.GetComponent<LockableZone>().generator     = this.gameObject;
 
-            case "Top":
-                
-                break;
+        thresholdZone.GetComponent<ThresholdZone>().rewardZone = rewardZone;
+        thresholdZone.GetComponent<ThresholdZone>().lockableZone = lockableZone;
 
-            case "Middle":
-                newPlatform.AddComponent<MiddlePlatform>();
-                break;
-
-            case "Bottom":
-                newPlatform.AddComponent<BottomPlatform>();
-                break;
-        }
-
-
-
-
+        rewardZone.GetComponent<RewardZone>().lockableZone = lockableZone;
     }
 
 
 
-    //private void GenerateLevel()
-    //{
-    //    for(int i = 0; i < levelLength; i++)
-    //    {
-    //        lastPlatformIdx = levelPlatforms.Count - 1;
 
-    //        // Place the starting platform.
-    //        if (i == 0)
-    //        {
-    //            AddPlatform(startingPlatform);
-    //            continue;
-    //        }
+    private List<GameObject> ThirdLayer()
+    {
+        Vector3 newPosition = Vector3.zero;
 
+        // Place the third lot of platforms.
+        List<GameObject> thirdLayerPlatforms = new List<GameObject>();
+        for (int i = 0; i < 2; i++)
+        {
+            int randomPick3 = Random.Range(0, previousPlatforms.Count);
+            GameObject platformToGenerateFrom = previousPlatforms[randomPick3];
+            List<float> thirdPlatformsPositions = new List<float>(Rules.Options("Big Layer", platformToGenerateFrom.GetComponent<Zone>().layer));
 
-    //        // Get a list of the possible next moves
-    //        string lastPlatformType = levelPlatforms[lastPlatformIdx].GetComponent<Platform>().GetPlatformType();
-    //        string[] nextPlatformOptions;
-    //        if (lastPlatformType == "High Top")
-    //        {
-    //            nextPlatformOptions = Rules.NextPlatform("Middle");
-    //        }
-    //        else
-    //        {
-    //            nextPlatformOptions = Rules.NextPlatform(lastPlatformType);
-    //        }
-    //        //Debug.Log("Display options based on last type (" + lastPlatformType + ")");
-    //        //foreach (var option in nextPlatformOptions)
-    //        //{
-    //        //    Debug.Log(option);
-    //        //}
+            previousPlatforms.RemoveAt(randomPick3);
 
-    //        int randomPick = Random.Range(0, nextPlatformOptions.Length);
-    //        string currentPlatformType = nextPlatformOptions[randomPick];
+            int howManyToGenerate = Random.Range(1, 2);
+            for (int j = 0; j < howManyToGenerate; j++)
+            {
+                int randomPick3A = Random.Range(0, thirdPlatformsPositions.Count);
 
-    //        //Debug.Log("Random number min (" + 0 + "), max  (" + nextPlatformOptions.Length + ")");
-    //        //Debug.Log("Random choice: " + randomPick);
+                newPosition.x = platformToGenerateFrom.transform.position.x + platformToGenerateFrom.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
+                newPosition.y = thirdPlatformsPositions[randomPick3A];
+                newPosition.z = platformToGenerateFrom.transform.position.z;
 
-    //        if (lastPlatformType == "Top" && currentPlatformType == "Middle")
-    //        {
-    //            int flipCoin = Random.Range(0, 1);
-    //            if (flipCoin == 1)
-    //            {
-    //                AddUnlistedPlatform("High Top");
-    //            }
-    //            AddPlatform("Middle");
+                GameObject layerThreePlatform = Instantiate(zonePrefab, newPosition, Quaternion.identity);
+                layerThreePlatform.AddComponent<Zone>().layer = Rules.PlatformName("Little Layer", thirdPlatformsPositions[randomPick3A]);
+
+               // Debug.Log("Layer Three Name: " + layerThreePlatform.GetComponent<Zone>().layer);
+               // Debug.Log("Layer Three pos: " + thirdPlatformsPositions[randomPick3A]);
 
 
-    //        }
-    //        else
-    //        {
-    //            AddPlatform(currentPlatformType);
-    //        }
+                thirdPlatformsPositions.RemoveAt(randomPick3A);
 
 
-    //    }
-    //}
-
-
-    //private void AddPlatform(string type)
-    //{
-    //    GameObject newPlatform;
-    //    Vector3    newPosition;
-
-
-    //    // Create the new platform
-    //    newPlatform = Instantiate(platformPrefab);
-
-    //    // Assign Platform correct type
-    //    switch (type)
-    //    {
-    //        case "High Top":
-    //            newPlatform.AddComponent<HighTopPlatform>();
-    //            break;
-
-    //        case "Top":
-    //            newPlatform.AddComponent<TopPlatform>();
-    //            break;
-
-    //        case "Middle":
-    //            newPlatform.AddComponent<MiddlePlatform>();
-    //            break;
-
-    //        case "Bottom":
-    //            newPlatform.AddComponent<BottomPlatform>();
-    //            break;
-    //    }
-
-
-    //    // If this is the first platform place it at the beginning. 
-    //    if (levelPlatforms.Count <= 0)
-    //    {
-    //       // Debug.Log("Setting position values for the first platform");
-    //        newPosition.x = 0f;
-    //        newPosition.y = 0f;
-    //        newPosition.z = 0f;
-    //    }
-    //    else
-    //    {
-    //        GameObject lastPlatform = levelPlatforms[lastPlatformIdx];
-
-    //       // Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
-    //        newPosition.x = lastPlatform.transform.position.x + lastPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
-    //        newPosition.y = newPlatform.GetComponent<Platform>().GetHeight();
-    //        newPosition.z = lastPlatform.transform.position.z;
-    //    }
-
-    //    newPlatform.transform.position = new Vector3(newPosition.x, newPosition.y, newPosition.z);
-    //    levelPlatforms.Add(newPlatform);
-
-    //    //Debug.Log("Full vec position for new " + newPlatform.GetComponent<Platform>().GetPlatformType() + " platform "  + newPosition);
-    //    //Debug.Log(type + " platform has been added to the list");
-    //}
-
-
-    //private void AddUnlistedPlatform(string type)
-    //{
-    //    GameObject newPlatform;
-    //    Vector3 newPosition;
-
-
-    //    // Create the new platform
-    //    newPlatform = Instantiate(platformPrefab);
-
-    //    // Assign Platform correct type
-    //    switch (type)
-    //    {
-    //        case "High Top":
-    //            newPlatform.AddComponent<HighTopPlatform>();
-    //            break;
-
-    //        case "Top":
-    //            newPlatform.AddComponent<TopPlatform>();
-    //            break;
-
-    //        case "Middle":
-    //            newPlatform.AddComponent<MiddlePlatform>();
-    //            break;
-
-    //        case "Bottom":
-    //            newPlatform.AddComponent<BottomPlatform>();
-    //            break;
-    //    }
-
-    //    GameObject lastPlatform = levelPlatforms[lastPlatformIdx];
-
-    //    // Debug.Log("Setting position values for platform at index " + (lastPlatformIdx + 1));
-    //    newPosition.x = lastPlatform.transform.position.x + lastPlatform.transform.lossyScale.x + PlayerMetrics.staticJumpDistance;
-    //    newPosition.y = newPlatform.GetComponent<Platform>().GetHeight();
-    //    newPosition.z = lastPlatform.transform.position.z;
-
-    //    newPlatform.transform.position = new Vector3(newPosition.x, newPosition.y, newPosition.z);
-
-    //}
+                generatedZones.Add(layerThreePlatform);
+                thirdLayerPlatforms.Add(layerThreePlatform);
+            }
+        }
+        previousPlatforms.Clear();
+        return thirdLayerPlatforms;
+    }
+    
 
 
     private void AddPlayer()
     {
-        float yOffset = levelPlatforms[0].transform.lossyScale.y + (playerPrefab.transform.lossyScale.y / 2);
+        if (generatedZones.Count <= 0) return;
 
-        float x = levelPlatforms[0].transform.position.x;
-        float y = levelPlatforms[0].transform.position.y + yOffset;
-        float z = levelPlatforms[2].transform.position.z;
+        print("Making player");
 
+        float yOffset = generatedZones[0].transform.lossyScale.y + (playerPrefab.transform.lossyScale.y / 2);
 
+        float x = generatedZones[0].transform.position.x;
+        float y = generatedZones[0].transform.position.y + yOffset;
+        float z = generatedZones[0].transform.position.z;
+
+        print("PLacing at position " + new Vector3(x, y, z));
         playerClone = Instantiate(playerPrefab, new Vector3(x, y, z), Quaternion.identity);
     }
 
