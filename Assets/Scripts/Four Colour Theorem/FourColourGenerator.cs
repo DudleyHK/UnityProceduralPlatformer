@@ -20,6 +20,7 @@ public class FourColourGenerator : MonoBehaviour
     public GameObject platformPrefab;
     public short totalPlatforms = 7;
     public float fraction = 10f;
+    public float neighbourDistanceAllowance = 0.1f;
     public float timeToGenerate = 0f;
 
 
@@ -63,8 +64,10 @@ public class FourColourGenerator : MonoBehaviour
 
     private IEnumerator Generate()
     {
-        bool createNext = true;
         timeToGenerate = 0f;
+
+        // Generate Level
+        bool createNext = true;
         while(true)
         {
             if(platforms.Count >= totalPlatforms) break;
@@ -94,8 +97,53 @@ public class FourColourGenerator : MonoBehaviour
             timeToGenerate += Time.deltaTime;
             yield return false;
         }
+
+        // Generate Colours
+        while(true)
+        {
+            AddNeighbours();
+            AddColour();
+            break;
+            yield return false;
+        }
+
+
         Debug.Log("Time to generate: " + timeToGenerate);
         yield return true;
+    }
+
+
+    private void GenerateMaze()
+    {
+        bool createNext = true;
+        while(true)
+        {
+            if(platforms.Count >= totalPlatforms) break;
+            if(platforms.Count <= 0)
+            {
+                var newPlatform = CreateNew(new Vector2(0f, 0f));
+                platforms.Add(newPlatform);
+                continue;
+            }
+
+            if(createNext)
+            {
+                StartCoroutine(FindNewPosition(result =>
+                {
+                    if(result)
+                    {
+                        createNext = true;
+                        //print("create next flag is " + createNext);
+                    }
+                    else
+                    {
+                        createNext = false;
+                        //print("create next flag is " + createNext);
+                    }
+                }));
+            }
+            timeToGenerate += Time.deltaTime;
+        }
     }
 
 
@@ -144,7 +192,7 @@ public class FourColourGenerator : MonoBehaviour
             var randomWidth  = UnityEngine.Random.Range(minX, maxX);
 
             var newPosition = Vector2.zero;
-            var randomPlacement = UnityEngine.Random.Range(1, 4);
+            var randomPlacement = UnityEngine.Random.Range(1, 5);
             //print("New Random Placement is " + randomPlacement);
 
             switch((Place)randomPlacement)
@@ -209,6 +257,75 @@ public class FourColourGenerator : MonoBehaviour
         if (subject.min.y >= other.max.y) return false; // subject is below other
         return true; // bounds overlap
     }
+
+
+
+    private void AddNeighbours()
+    {
+        foreach(var platform in platforms)
+        {
+            foreach(var neighbour in platforms)
+            {
+                if(platform == neighbour) continue;
+                if(Vector2.Distance(platform.transform.position, neighbour.transform.position) > neighbourDistanceAllowance)
+                {
+                    if(!platform.GetComponent<SpriteRenderer>().bounds.Intersects(neighbour.GetComponent<SpriteRenderer>().bounds))
+                        continue;
+                }
+
+                platform.GetComponent<FCPlatformScript>().Neighbours.Add(neighbour);
+            }
+        }
+    }
+
+
+
+    private void AddColour()
+    {
+        for(int i = 0; i < platforms.Count; i++)
+        {
+            var platform = platforms[i];
+            var platformFCScript = platform.GetComponent<FCPlatformScript>();
+
+            // Assign a random Colour.
+            if(i == 0)
+            {
+                var randColour = UnityEngine.Random.Range(1, 5);
+                platformFCScript.ColourValue = (FCPlatformScript.Colour)randColour;
+            }
+
+            // Get a list of the current platforms neighbours.
+            var neighbourList = platformFCScript.Neighbours;
+            foreach(var neighbour in neighbourList)
+            {
+                var neighbourPlatformScript = neighbour.GetComponent<FCPlatformScript>();
+                var availableColours = new List<FCPlatformScript.Colour>();
+
+                // for each of the neighbours, neighbours
+                foreach(var childNeighbour in neighbourPlatformScript.Neighbours)
+                {
+                    var childColour = childNeighbour.GetComponent<FCPlatformScript>().ColourValue;
+                    if(childColour != FCPlatformScript.Colour.Unassigned)
+                    {
+                        // get a list of all the surrounding colours.
+                        availableColours.Add(childColour);
+                    }
+                }
+                for(int j = 1; j <= 4; j++)
+                {
+                    var colourValue = (FCPlatformScript.Colour)j;
+                    if(!availableColours.Contains(colourValue))
+                    {
+                        neighbourPlatformScript.ColourValue = colourValue;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
     //// %#c  == CMD + SHIFT + C
     [MenuItem("Tools/Clear Console %c")] // C
