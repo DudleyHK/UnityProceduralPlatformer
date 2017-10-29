@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour
        
         if (Input.GetKeyDown(KeyCode.W))
         {
-           newPosition.y += jumpVelocity * Time.deltaTime;
+          newPosition.y += jumpVelocity * Time.deltaTime;
         }
         if(Input.GetKey(KeyCode.A))
         {
