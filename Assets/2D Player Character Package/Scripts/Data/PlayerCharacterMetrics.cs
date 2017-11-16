@@ -8,8 +8,8 @@ using System.Collections.Generic;
 public class PlayerCharacterMetrics
 {
     public const float WALKING_JUMP_HEIGHT       = 29f;
-    public const float WALKING_MIN_JUMP_DISTANCE = 36.4f;    // shortest jump distance
-    public const float WALKING_MAX_JUMP_DISTANCE = 73f;
+    public const float WALKING_MIN_JUMP_DISTANCE = 32f;    // shortest jump distance
+    public const float WALKING_MAX_JUMP_DISTANCE = 58f;
 
     public const float RUNNING_JUMP_HEIGHT       = 57f;
     public const float RUNNING_MIN_JUMP_DISTANCE = 66.2f;

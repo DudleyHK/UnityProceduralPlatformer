@@ -19,6 +19,7 @@ public class PlayerManager : MonoBehaviour
         walkBehaviour = GetComponent<Walk>();
         animator      = GetComponent<Animator>();
 		collisionState = GetComponent<CollisionState>();
+
     }
 
 	private void Update()
@@ -38,7 +39,6 @@ public class PlayerManager : MonoBehaviour
 
 		animator.speed = walkBehaviour.running ? walkBehaviour.runMultiplier : 1;
 	}
-
 
     private void ChangeAnimationState(int value)
     {

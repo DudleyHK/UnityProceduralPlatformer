@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PlatformWorldObjectGenerator : MonoBehaviour
 {
-    public GameObject groundPrefab;
+    public GameObject floorPrefab;
+    public GameObject groundPrefab; 
     public GameObject debugPrefab;
     public float xAlignment = 0f;
     public float yAlignment = 0f;
@@ -27,7 +28,7 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
                 continue;
             }
 
-            var newTile = Instantiate(groundPrefab, new Vector2(xAlignment, yAlignment), Quaternion.identity);
+            var newTile = Instantiate(floorPrefab, new Vector2(xAlignment, yAlignment), Quaternion.identity);
         }
     }
 
@@ -36,13 +37,13 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
     {
         var x = index % 4;
         var y = index / 4;
-        var tileSize = groundPrefab.transform.localScale;
+        var tileSize = floorPrefab.transform.localScale;
 
 
         yAlignment = yPositions[y];
         xAlignment = xPositions[x];
-        print("xAlignment: " + xAlignment);
-        print("yAlignment: " + yAlignment);
+       // print("xAlignment: " + xAlignment);
+       // print("yAlignment: " + yAlignment);
     }
 
 
@@ -50,6 +51,7 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
     {
         switch(type)
         {
+            case 'F': return floorPrefab;
             case 'G': return groundPrefab;
             case 'J': return null;
             case '*': return null;
