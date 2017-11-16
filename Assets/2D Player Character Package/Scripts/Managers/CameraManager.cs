@@ -12,12 +12,16 @@ public class CameraManager : MonoBehaviour
 
     private void Start()
     {
-        if(player == null)
+        if(!player)
         {
             var playerTag = GameObject.FindGameObjectWithTag("Player");
-            if(!playerTag)
+            if(playerTag)
             {
-                Debug.Log("Player tag cannot be found or object is not set in the CameraManager class");
+                player = playerTag;
+            }
+            else
+            {
+                print("ERROR: Player tag not applied");
             }
         }
     }
