@@ -9,7 +9,8 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
     public float xAlignment = 0f;
     public float yAlignment = 0f;
 
-    private List<float> rowHeights = new List<float>(new float[] { -14f, -46f, -78f, -100f });
+    private List<float> yPositions = new List<float>(new float[] { -14f, -46f, -78f, -100f });
+    private List<float> xPositions = new List<float>(new float[] { 0f, 32f, 64f, 96f });
 
 
 
@@ -22,7 +23,7 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
 
             if(!tileType)
             {
-                print("tile type is null (jump or space)");
+                print("Tile type is null (jump or space)");
                 continue;
             }
 
@@ -33,8 +34,15 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
 
     private void SetAlignment(int index)
     {
-        // get rows and columns 
-        // yAlignment = rowHeights[row];
+        var x = index % 4;
+        var y = index / 4;
+        var tileSize = groundPrefab.transform.localScale;
+
+
+        yAlignment = yPositions[y];
+        xAlignment = xPositions[x];
+        print("xAlignment: " + xAlignment);
+        print("yAlignment: " + yAlignment);
     }
 
 
