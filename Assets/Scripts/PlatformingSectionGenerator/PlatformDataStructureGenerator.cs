@@ -10,6 +10,13 @@ public class PlatformDataStructureGenerator : MonoBehaviour
 {
     private int dataSetLength = 4;
 
+    private List<Obstacle> obstcaleStructures = new List<Obstacle>(new Obstacle[] 
+    {
+        new ObstacleStructures.FloorJumpFloor(),
+        new ObstacleStructures.FloorJumpFloor()
+     });
+
+
     private void Start()
     {
         GenerateDataStructure(new ObstacleStructures.FloorJumpFloor());    
@@ -25,7 +32,6 @@ public class PlatformDataStructureGenerator : MonoBehaviour
         }
 
         UnpackObstacleStructure(obstacle);
-     
     }
 
     private void UnpackObstacleStructure(Obstacle obstacle)
@@ -35,17 +41,14 @@ public class PlatformDataStructureGenerator : MonoBehaviour
 
         Debug.Log("Is obstacle length more than 4: " + (obstacleLength > 4) + ". It is " + obstacleLength);
 
-        for(int i = 0; i < dataSetLength; i++)
+        for(var i = 0; i < dataSetLength; i++)
         {
             var index = GetIndex(2, i);
 
             if(i > (obstacleLength - 1))
             {
-                // Use the difficulty to determine what should be placed.
-
-
                 print("No more obstacles left to place. Inserting floor tile.");
-                characterList[index] = 'F';
+                characterList[index] = GetLastCharacter(obstacle.Difficulty);
                 continue;
             }
             else
@@ -54,10 +57,30 @@ public class PlatformDataStructureGenerator : MonoBehaviour
                 characterList[index] = currentCharacter;
             }
         }
+
+        for(var i = 0; i < characterList.Count; i++)
+        {
+            var character = characterList[i];
+            switch(character)
+            {
+                case 'F':
+                    characterList[i + dataSetLength] = 'G';
+                    print("F found at " + i);
+                    break;
+                case 'G':
+                    break;
+                case 'J':
+                    print("J found at " + i);
+                    characterList[i + dataSetLength] = JumpCost(obstacle.CostOfFailure);
+                    break;
+            }
+        }
+
+
+
         PrintDataStructureToTextFile(obstacle.Name, characterList);
         GetComponent<PlatformWorldObjectGenerator>().CreateWorldObject(characterList);
     }
-
 
     private void PrintDataStructureToTextFile(string name, List<char> characterList)
     {
@@ -65,14 +88,12 @@ public class PlatformDataStructureGenerator : MonoBehaviour
 
         if(File.Exists(filename))
         {
-            Debug.Log(filename + " already exists.. Deleting.");
             File.Delete(filename);
         }
         var outputFile = File.CreateText(filename);
         outputFile.WriteLine("Obstacle data output for " + name);
 
 
-        print("Characterset size: " + characterList);
         string line = "";
         for(int i = 0; i < characterList.Count; i++)
         {
@@ -82,10 +103,11 @@ public class PlatformDataStructureGenerator : MonoBehaviour
                 outputFile.WriteLine(line + "\n");
                 line = "";
             }
+            print("Character in list is " + characterList[i]);
             line += characterList[i];
-
         }
-        outputFile.Write("\n\n");
+
+        outputFile.Write(line + "\n\n");
         outputFile.Close();
 
        
@@ -105,7 +127,44 @@ public class PlatformDataStructureGenerator : MonoBehaviour
     private int GetIndex(int row, int column)
     {
         var index = ((dataSetLength * row) + column);
-        print("ID for row (" + row + ") and column (" +column + ") is " + index);
+        print("ID for row (" + row + ") and column (" + column + ") is " + index);
         return index;
+    }
+
+    private char GetLastCharacter(int difficulty)
+    {
+        print("No more obstacles left to place. Inserting floor tile.");
+        if(difficulty == 1)
+        {
+            // Easy level difficulty
+            return 'F';
+        }
+        else if(difficulty == 2)
+        {
+            // Medium level difficulty
+            return 'F';
+
+        }
+        else
+        {
+            // Hard difficulty, turns into two jumps in a row. 
+            return '*'; 
+        }
+    }
+
+    private char JumpCost(ushort costOfFailure)
+    {
+        if(costOfFailure == 1)
+        {
+            return 'G';
+        }
+        else if(costOfFailure == 2)
+        {
+            return 'D';
+        }
+        else
+        {
+            return 'D';
+        }
     }
 }

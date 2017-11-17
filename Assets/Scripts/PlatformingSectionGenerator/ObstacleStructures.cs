@@ -62,7 +62,7 @@ public class ObstacleStructures
         {
             this.Name          = "FJF";
             this.Difficulty    = 1;
-            this.CostOfFailure = 2;
+            this.CostOfFailure = 1;
         }
     }
 }

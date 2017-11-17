@@ -28,7 +28,7 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
                 continue;
             }
 
-            var newTile = Instantiate(floorPrefab, new Vector2(xAlignment, yAlignment), Quaternion.identity);
+            var newTile = Instantiate(tileType, new Vector2(xAlignment, yAlignment), Quaternion.identity);
         }
     }
 
@@ -53,6 +53,7 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
         {
             case 'F': return floorPrefab;
             case 'G': return groundPrefab;
+            case 'D': return null;
             case 'J': return null;
             case '*': return null;
         }
