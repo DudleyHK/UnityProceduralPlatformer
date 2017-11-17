@@ -13,13 +13,20 @@ public class PlatformDataStructureGenerator : MonoBehaviour
     private List<Obstacle> obstcaleStructures = new List<Obstacle>(new Obstacle[] 
     {
         new ObstacleStructures.FloorJumpFloor(),
+        new ObstacleStructures.FloorJumpFloor(),
         new ObstacleStructures.FloorJumpFloor()
      });
 
 
+    private List<List<char>> characterLists = new List<List<char>>();
+
     private void Start()
     {
-        GenerateDataStructure(new ObstacleStructures.FloorJumpFloor());    
+        foreach(var obstacle in obstcaleStructures)
+        {
+            GenerateDataStructure(obstacle);    
+        }
+        GetComponent<PlatformWorldObjectGenerator>().CreateWorldObject(characterLists);
     }
 
 
@@ -79,7 +86,7 @@ public class PlatformDataStructureGenerator : MonoBehaviour
 
 
         PrintDataStructureToTextFile(obstacle.Name, characterList);
-        GetComponent<PlatformWorldObjectGenerator>().CreateWorldObject(characterList);
+        characterLists.Add(characterList);
     }
 
     private void PrintDataStructureToTextFile(string name, List<char> characterList)

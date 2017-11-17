@@ -4,19 +4,34 @@ using UnityEngine;
 
 public class PlatformWorldObjectGenerator : MonoBehaviour
 {
+    public List<GameObject> obstacleContainers = new List<GameObject>();
     public GameObject floorPrefab;
     public GameObject groundPrefab; 
     public GameObject debugPrefab;
+    public GameObject obstacleContainerPrefab;
     public float xAlignment = 0f;
     public float yAlignment = 0f;
 
-    private List<float> yPositions = new List<float>(new float[] { -14f, -46f, -78f, -100f });
-    private List<float> xPositions = new List<float>(new float[] { 0f, 32f, 64f, 96f });
+
+    private List<float> positions = new List<float>(new float[] { 0f, 32f, 64f, 96f });
+    private Vector2 obstacleContainerPosition = new Vector2(-200f, -110f);
+    private float obstacleContainerSize = 96f;
 
 
 
-    public void CreateWorldObject(List<char> obstacle)
+    public void CreateWorldObject(List<List<char>> characterLists)
     {
+   
+        for(var i = 0; i < characterLists.Count; i++)
+        {
+            SetContainerAligment(i);
+            GenerateSingleCharacterList(characterLists[i]);
+        }   
+    }
+
+    private void GenerateSingleCharacterList(List<char> obstacle)
+    {
+        var obstacleContainer = Instantiate(obstacleContainerPrefab, new Vector2(obstacleContainerPosition.x, obstacleContainerPosition.y), Quaternion.identity);
         for(int i = 0; i < obstacle.Count; i++)
         {
             SetAlignment(i);
@@ -27,11 +42,10 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
                 print("Tile type is null (jump or space)");
                 continue;
             }
-
-            var newTile = Instantiate(tileType, new Vector2(xAlignment, yAlignment), Quaternion.identity);
+            var newTile = Instantiate(tileType, new Vector2(xAlignment, yAlignment), Quaternion.identity, obstacleContainer.transform);
         }
+        obstacleContainers.Add(obstacleContainer);
     }
-
 
     private void SetAlignment(int index)
     {
@@ -39,9 +53,8 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
         var y = index / 4;
         var tileSize = floorPrefab.transform.localScale;
 
-
-        yAlignment = yPositions[y];
-        xAlignment = xPositions[x];
+        yAlignment = -positions[y];
+        xAlignment = positions[x];
        // print("xAlignment: " + xAlignment);
        // print("yAlignment: " + yAlignment);
     }
@@ -58,5 +71,18 @@ public class PlatformWorldObjectGenerator : MonoBehaviour
             case '*': return null;
         }
         return debugPrefab;
+    }
+
+
+    private void SetContainerAligment(int index)
+    {
+        if(index == 0)
+        {
+            obstacleContainerPosition.x += (obstacleContainerSize / 2f);
+        }
+        else
+        {
+            obstacleContainerPosition.x = (obstacleContainerSize / 2f) + (obstacleContainers[index - 1].transform.lossyScale.x / 2f);
+        }
     }
 }
