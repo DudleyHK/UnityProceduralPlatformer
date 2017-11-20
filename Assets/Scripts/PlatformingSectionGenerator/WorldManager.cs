@@ -10,6 +10,7 @@ public class WorldManager : MonoBehaviour
     public ushort totalObstacles = 5;
     public List<Obstacle> obstacleStructures;
     public List<GameObject> obstacleParents;
+    public List<List<char>> characterLists = new List<List<char>>();
 
     private GenerateLevel   generateLevel;
     private DataReader      dataReader;
@@ -42,7 +43,6 @@ public class WorldManager : MonoBehaviour
 
     private IEnumerator Regenerate()
     {
-        ushort count = 0;
 
         ResetScene();
        
@@ -51,13 +51,18 @@ public class WorldManager : MonoBehaviour
 
         // buidl the parent objects to the scene
         // obstacleParents = buildToScene.BuildParents(totalObstacles);
-        while(count <= totalObstacles)
+        for(ushort i = 0; i <= totalObstacles; i++)
         {
             // read data for single obstacle
+            var obstacleData = dataReader.RunDataReader(obstacleStructures[i]);
+
             // build the obstacle into a gameobject
+            obstacleBuilder.BuildObstacle(obstacleData);
+
             // build the obstacle to the scene
 
-            count++;
+            // add the obstacle to the obstacle list.
+
             yield return false;
         }
         yield return true;
@@ -68,7 +73,10 @@ public class WorldManager : MonoBehaviour
         // Destory all world objects.
         
         // Clear list.
-        obstacleStructures.Clear();
+        if(obstacleStructures != null && obstacleStructures.Count >= 0)
+        {
+            obstacleStructures.Clear();
+        }
     }
 
 }

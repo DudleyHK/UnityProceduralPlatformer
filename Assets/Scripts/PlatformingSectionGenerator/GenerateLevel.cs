@@ -23,6 +23,7 @@ public class GenerateLevel : ScriptableObject
         {
              new ObstacleStructures.FloorJumpFloor(),
              new ObstacleStructures.FloorJumpFloor(),
+             new ObstacleStructures.FloorJumpFloor(), 
              new ObstacleStructures.FloorJumpFloor()
         });
     }

@@ -26,6 +26,9 @@ public class PlatformDataStructureGenerator : MonoBehaviour
         {
             GenerateDataStructure(obstacle);    
         }
+
+
+
         GetComponent<PlatformWorldObjectGenerator>().CreateWorldObject(characterLists);
     }
 

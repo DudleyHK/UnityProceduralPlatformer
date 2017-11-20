@@ -8,7 +8,7 @@ public class ObstacleBuilder : ScriptableObject
 
 
     // Take a single obsticle and the parent which it'll be build into.
-    private bool BuildObstacle(List<char> obstacle)
+    public bool BuildObstacle(List<char> obstacleData)
     {
         return true;
     }
