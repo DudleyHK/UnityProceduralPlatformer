@@ -7,7 +7,7 @@ using Obstacle = ObstacleStructures.Obstacle;
 // This unpacks the data files
 public class DataReader : ScriptableObject 
 {
-    private ushort dataLength = 4;
+    public ushort dataLength = 4;
 
     private List<char> characterList;
 
@@ -46,7 +46,7 @@ public class DataReader : ScriptableObject
 
             if (i > (obstacleLength - 1))
             {
-                Debug.Log("No more obstacles left to place. Inserting floor tile.");
+                //Debug.Log("No more obstacles left to place. Inserting floor tile.");
                 characterList[index] = GetLastCharacter(obstacle.Difficulty);
                 continue;
             }
@@ -67,13 +67,13 @@ public class DataReader : ScriptableObject
             switch (character)
             {
                 case 'F':
-                    Debug.Log("F found at " + i);
+                   // Debug.Log("F found at " + i);
                     characterList[i + dataLength] = 'G';
                     break;
                 case 'G':
                     break;
                 case 'J':
-                    Debug.Log("J found at " + i);
+                   // Debug.Log("J found at " + i);
                     characterList[i + dataLength] = JumpCost(obstacle.CostOfFailure);
                     break;
             }
@@ -84,7 +84,7 @@ public class DataReader : ScriptableObject
 
     private char GetLastCharacter(int difficulty)
     {
-        Debug.Log("No more obstacles left to place. Inserting floor tile.");
+        //Debug.Log("No more obstacles left to place. Inserting floor tile.");
         if (difficulty == 1)
         {
             // Easy level difficulty
@@ -120,7 +120,7 @@ public class DataReader : ScriptableObject
     private int GetIndex(int row, int column)
     {
         var index = ((dataLength * row) + column);
-        Debug.Log("ID for row (" + row + ") and column (" + column + ") is " + index);
+        //Debug.Log("ID for row (" + row + ") and column (" + column + ") is " + index);
         return index;
     }
 

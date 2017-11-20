@@ -8,23 +8,20 @@ using Obstacle = ObstacleStructures.Obstacle;
 public class WorldManager : MonoBehaviour 
 {
     public ushort totalObstacles = 5;
-    public List<Obstacle> obstacleStructures;
-    public List<GameObject> obstacleParents;
-    public List<List<char>> characterLists = new List<List<char>>();
+    public List<Obstacle>   obstacleStructures;
+    public List<Vector2> obstacleParentPositions;
+    public List<List<GameObject>> obstacleObjects = new List<List<GameObject>>();
+    public BuildToScene buildToScene;
 
     private GenerateLevel   generateLevel;
     private DataReader      dataReader;
-    private BuildToScene    buildToScene;
-    private ObstacleBuilder obstacleBuilder;
 
 
 
     private void Start()
     {
-        generateLevel = new GenerateLevel();
-        dataReader = new DataReader();
-        obstacleBuilder = new ObstacleBuilder();
-        buildToScene = new BuildToScene();
+        generateLevel   = ScriptableObject.CreateInstance("GenerateLevel")   as GenerateLevel;
+        dataReader      = ScriptableObject.CreateInstance("DataReader")      as DataReader;
 
         StartCoroutine(Regenerate());
     }
@@ -43,26 +40,33 @@ public class WorldManager : MonoBehaviour
 
     private IEnumerator Regenerate()
     {
+        int count = 0;
 
         ResetScene();
        
         // Procedurally generate series of obsticles.
-        obstacleStructures = generateLevel.RunObstacleGenerator(totalObstacles);
+        obstacleStructures = generateLevel.RunObstacleGenerator((ushort)(totalObstacles - 1));
 
-        // buidl the parent objects to the scene
-        // obstacleParents = buildToScene.BuildParents(totalObstacles);
-        for(ushort i = 0; i <= totalObstacles; i++)
+        // Build the parent objects to the scene
+        obstacleParentPositions = buildToScene.BuildParents(totalObstacles);
+        while(count < (totalObstacles - 1))
         {
+            var obstacle = obstacleStructures[count];
+
             // read data for single obstacle
-            var obstacleData = dataReader.RunDataReader(obstacleStructures[i]);
+            var obstacleData = dataReader.RunDataReader(obstacle);
+            if(obstacleData == null)
+            {
+                Debug.Log("ERROR: Obstacle Data is null");
+                break;
+            }
 
-            // build the obstacle into a gameobject
-            obstacleBuilder.BuildObstacle(obstacleData);
+            // build the obstacle into the scene
+            var obsticleObj  = buildToScene.BuildObstacle(obstacleData, obstacleParentPositions[count], dataReader.dataLength);
+            if (obsticleObj == null) Debug.Log("ERROR: Obstacle Object has return null");
 
-            // build the obstacle to the scene
-
-            // add the obstacle to the obstacle list.
-
+            obstacleObjects.Add(obsticleObj);
+            count++;
             yield return false;
         }
         yield return true;
@@ -71,8 +75,23 @@ public class WorldManager : MonoBehaviour
     private void ResetScene()
     {
         // Destory all world objects.
-        
-        // Clear list.
+        foreach (var list in obstacleObjects)
+        {
+            foreach (var obj in list)
+            {
+                Destroy(obj);
+            }
+        }
+
+
+        if(obstacleParentPositions != null && obstacleParentPositions.Count >= 0)
+        {
+            obstacleParentPositions.Clear();
+        }
+        if (obstacleObjects != null && obstacleObjects.Count >= 0)
+        {
+            obstacleObjects.Clear();
+        }
         if(obstacleStructures != null && obstacleStructures.Count >= 0)
         {
             obstacleStructures.Clear();

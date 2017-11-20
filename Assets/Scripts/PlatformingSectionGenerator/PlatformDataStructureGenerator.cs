@@ -14,6 +14,8 @@ public class PlatformDataStructureGenerator : MonoBehaviour
     {
         new ObstacleStructures.FloorJumpFloor(),
         new ObstacleStructures.FloorJumpFloor(),
+        new ObstacleStructures.FloorJumpFloor(),
+        new ObstacleStructures.FloorJumpFloor(),
         new ObstacleStructures.FloorJumpFloor()
      });
 
