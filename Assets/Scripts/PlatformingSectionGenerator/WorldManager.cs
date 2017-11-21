@@ -40,18 +40,16 @@ public class WorldManager : MonoBehaviour
 
     private IEnumerator Regenerate()
     {
-        int count = 0;
-
         ResetScene();
        
         // Procedurally generate series of obsticles.
-        obstacleStructures = generateLevel.RunObstacleGenerator((ushort)(totalObstacles - 1));
+        obstacleStructures = generateLevel.RunObstacleGenerator((ushort)totalObstacles);
 
         // Build the parent objects to the scene
         obstacleParentPositions = buildToScene.BuildParents(totalObstacles);
-        while(count < (totalObstacles - 1))
+        for(int i = 0; i < totalObstacles; i++)
         {
-            var obstacle = obstacleStructures[count];
+            var obstacle = obstacleStructures[i];
 
             // read data for single obstacle
             var obstacleData = dataReader.RunDataReader(obstacle);
@@ -62,11 +60,10 @@ public class WorldManager : MonoBehaviour
             }
 
             // build the obstacle into the scene
-            var obsticleObj  = buildToScene.BuildObstacle(obstacleData, obstacleParentPositions[count], dataReader.dataLength);
+            var obsticleObj  = buildToScene.BuildObstacle(obstacleData, obstacleParentPositions[i], dataReader.dataLength);
             if (obsticleObj == null) Debug.Log("ERROR: Obstacle Object has return null");
 
             obstacleObjects.Add(obsticleObj);
-            count++;
             yield return false;
         }
         yield return true;

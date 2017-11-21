@@ -10,7 +10,11 @@ public class BuildToScene : MonoBehaviour
     public GameObject floorPrefab;
     public GameObject groundPrefab;
     public GameObject debugPrefab;
+    public List<GameObject> tileList;
 
+    private Vector2 tilePosition;
+    private float xOffset  ;
+    private float yOffset  ;
 
 
     public List<Vector2> BuildParents(ushort total)
@@ -19,8 +23,9 @@ public class BuildToScene : MonoBehaviour
         var parentSize = parentPrefab.transform.lossyScale;
         var position = new Vector2(0f, 0f);
 
-        var xPos = -180f;
-        var yPos = -70f;
+      
+        var xPos = -136f;
+        var yPos = -46f;
 
         for (var i = 0; i < total; i++)
         {
@@ -33,7 +38,6 @@ public class BuildToScene : MonoBehaviour
             {
                 position.x = parentList[i - 1].x + parentSize.x;
             }
-
             parentList.Add(position);
         }
 
@@ -43,14 +47,15 @@ public class BuildToScene : MonoBehaviour
     // Use the parents position instead of the Game object
     public List<GameObject> BuildObstacle(List<char> obstacleData, Vector2 parentPosition, ushort dataLength)
     {
-        List<GameObject> tileList = new List<GameObject>();
+        SetTileOffsets(parentPosition);
+        tileList = new List<GameObject>();
         for (ushort i = 0; i < obstacleData.Count; i++)
         {
             var tilePosition = GetAlignment(parentPosition, dataLength, i);
             var tileType = GetTileType(obstacleData[i]);
             if (!tileType)
             {
-                print("Tile type is null (jump or space)");
+                //print("Tile type is null (jump or space)");
                 continue;
             }
             var newTile = Instantiate(tileType, tilePosition, Quaternion.identity);
@@ -62,20 +67,17 @@ public class BuildToScene : MonoBehaviour
 
     private Vector2 GetAlignment(Vector2 parentPosition, ushort dataLength, ushort index)
     {
-        var xOffset = parentPosition.x - parentPrefab.transform.lossyScale.x + 16; // 16 = tile size
-        var yOffset = parentPosition.y - parentPrefab.transform.lossyScale.y - 16;
-        var position = new Vector2(xOffset, yOffset);
-
-        if ((index % dataLength == 0) && (index > 0))
+        if(index % dataLength == 0 && index > 0)
         {
-            position.x = xOffset;
-            position.y += 32; // 32 - tile prefab size
+            //Debug.Log("Tile " + index + " is set to original");
+            tilePosition.x = xOffset;
+            tilePosition.y += -32f; // 32 - tile prefab size
         }
         else
         {
-            position.x += 32; // 32 - tile prefab size
+            tilePosition.x += 32f; // 32 - tile prefab size
         }
-        return position;
+        return tilePosition;
     }
 
 
@@ -85,10 +87,19 @@ public class BuildToScene : MonoBehaviour
         {
             case 'F': return floorPrefab;
             case 'G': return groundPrefab;
-            case 'D': return null;
+            case 'D': return null; // Danger
             case 'J': return null;
             case '*': return null;
         }
         return debugPrefab;
+    }
+
+
+    private void SetTileOffsets(Vector2 parentPosition)
+    {
+       xOffset = parentPosition.x - (parentPrefab.transform.lossyScale.x / 2f) - 16f; // 16 = tile size
+       yOffset = parentPosition.y + (parentPrefab.transform.lossyScale.y / 2f) - 16f;
+       tilePosition = new Vector2(xOffset, yOffset);
+        Debug.Log("Tile offset position is " + tilePosition);
     }
 }
