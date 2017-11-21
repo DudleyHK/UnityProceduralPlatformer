@@ -66,16 +66,10 @@ public class DataReader : ScriptableObject
             var character = characterList[i];
             switch (character)
             {
-                case 'F':
-                   // Debug.Log("F found at " + i);
-                    characterList[i + dataLength] = 'G';
-                    break;
-                case 'G':
-                    break;
-                case 'J':
-                   // Debug.Log("J found at " + i);
-                    characterList[i + dataLength] = JumpCost(obstacle.CostOfFailure);
-                    break;
+                case 'F': characterList[i + dataLength] = 'G'; break;
+                case 'J': characterList[i + dataLength] = 'D'; break;
+                case 'j': characterList[i + dataLength] = 'G'; break;
+                case 'G': break;
             }
         }
     }

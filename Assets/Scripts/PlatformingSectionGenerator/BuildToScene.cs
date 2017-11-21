@@ -9,6 +9,7 @@ public class BuildToScene : MonoBehaviour
     public GameObject parentPrefab;
     public GameObject floorPrefab;
     public GameObject groundPrefab;
+    public GameObject jumpPrefab;
     public GameObject debugPrefab;
     public List<GameObject> tileList;
 
@@ -87,8 +88,11 @@ public class BuildToScene : MonoBehaviour
         {
             case 'F': return floorPrefab;
             case 'G': return groundPrefab;
+            case 'J': return jumpPrefab;
+            case 'j': return null;
+            case 'W': return null;
+            case 'w': return null;
             case 'D': return null; // Danger
-            case 'J': return null;
             case '*': return null;
         }
         return debugPrefab;

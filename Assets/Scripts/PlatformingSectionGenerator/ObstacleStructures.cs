@@ -13,8 +13,31 @@ public class ObstacleStructures
     // 2 - medium - medium
     // 3 - hard   - high
 
-    public abstract class Obstacle
+
+
+
+   // Tile types:
+   /*
+        F - Floor
+        G - Ground
+        J - High COF Jump
+        j - Low COF Jump
+        W - High Wall
+        w - Low wall
+        D - Danger
+        
+        
+   */
+
+    public class Obstacle
     {
+        public Obstacle(string name, ushort difficulty, ushort costOfFailure)
+        {
+            Name          = name;
+            Difficulty    = difficulty;
+            CostOfFailure = costOfFailure;
+        }
+
         private string name = "";
         public string Name
         {
@@ -52,17 +75,6 @@ public class ObstacleStructures
             {
                 costOfFailure = value;
             }
-        }
-    }
-
-
-    public class FloorJumpFloor : Obstacle
-    {
-        public FloorJumpFloor()
-        {
-            this.Name          = "FJF";
-            this.Difficulty    = 1;
-            this.CostOfFailure = 1;
         }
     }
 }

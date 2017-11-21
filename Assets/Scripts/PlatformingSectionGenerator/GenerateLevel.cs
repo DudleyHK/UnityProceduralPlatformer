@@ -7,8 +7,9 @@ using Obstacle = ObstacleStructures.Obstacle;
 
 public class GenerateLevel : ScriptableObject
 {
-
+    private List<Obstacle> obstacleList;
     // Use the Parse Tree structure to determine how the level is built.
+    // Group different sets of ObstacleStructures to create different challenges/
 
 
     /// <summary>
@@ -17,15 +18,31 @@ public class GenerateLevel : ScriptableObject
     /// <returns></returns>
     public List<Obstacle> RunObstacleGenerator(ushort totalObstacles)
     {
-
-        // Currently use basic level.
-        return new List<Obstacle>(new Obstacle[]
+        obstacleList = new List<Obstacle>();
+        for (int i = 0; i < totalObstacles; i++)
         {
-             new ObstacleStructures.FloorJumpFloor(),
-             new ObstacleStructures.FloorJumpFloor(),
-             new ObstacleStructures.FloorJumpFloor(),
-             new ObstacleStructures.FloorJumpFloor(),
-             new ObstacleStructures.FloorJumpFloor()
-        });
+            if(i == 0)
+            {
+                obstacleList.Add(new Obstacle("FFFF", 1, 1));
+                continue;
+            }
+            else if(i == (totalObstacles - 1))
+            {
+                obstacleList.Add(new Obstacle("FJJF", 1, 1));
+            }
+            else if (i == (totalObstacles / 2f))
+            {
+                obstacleList.Add(new Obstacle("FJJJ", 1, 1));
+            }
+            else if (i == (totalObstacles / 2f) + 1)
+            {
+                obstacleList.Add(new Obstacle("FJJJ", 1, 1));
+            }
+            else
+            {
+                obstacleList.Add(new Obstacle("FjjF", 1, 1));
+            }
+        }
+        return obstacleList;
     }
 }
