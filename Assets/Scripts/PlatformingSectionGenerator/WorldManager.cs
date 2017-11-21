@@ -23,7 +23,7 @@ public class WorldManager : MonoBehaviour
         generateLevel   = ScriptableObject.CreateInstance("GenerateLevel")   as GenerateLevel;
         dataReader      = ScriptableObject.CreateInstance("DataReader")      as DataReader;
 
-        StartCoroutine(Regenerate());
+        StartCoroutine(RegenerateModified());
     }
 
 
@@ -32,13 +32,46 @@ public class WorldManager : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.R))
         {
             StopAllCoroutines();
-            StartCoroutine(Regenerate());
+            StartCoroutine(RegenerateModified());
         }
     }
 
 
+    private IEnumerator RegenerateModified()
+    {
+        int width = 0;
+        int height = 0;
 
-    private IEnumerator Regenerate()
+        while(true)
+        {
+            // Generate
+            // Load
+            var data = dataReader.ExtractLevelData("JumpLevel.txt", ref width, ref height);
+            
+
+            // Debug output
+            string line = "";
+            for(var i = 0; i < data.Count; i++)
+            {
+                if(i % width == 0 && i > 0)
+                {
+                    line += "\n";
+                }
+                line += data[i];
+            }
+            Debug.Log("Width is " + width + " and height is " + height);
+            Debug.Log(line);
+
+
+            break;
+            yield return false;
+        }
+        yield return true;
+    }
+
+
+
+        private IEnumerator Regenerate()
     {
         ResetScene();
        

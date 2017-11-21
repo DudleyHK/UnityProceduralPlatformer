@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,73 @@ public class DataReader : ScriptableObject
     public ushort dataLength = 4;
 
     private List<char> characterList;
+    private int width = 0;
+    private int height = 0;
+
+
+    /// <summary>
+    /// Create list which represents a 2D array of data. Read and return the width and height
+    ///     and finally return the newly made array of char data.
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <returns></returns>
+    public List<char> ExtractLevelData(string file, ref int width, ref int height)
+    {
+        FileInfo     sourceFile = new FileInfo(file);
+        StreamReader reader  = sourceFile.OpenText();
+        characterList = new List<char>();
+
+
+        string text;
+        do
+        {
+            text = reader.ReadLine();
+
+            if(text == null) continue;
+            if(text == "")   continue;
+            if(text == "")   continue;
+
+            // Get the width and height values of the data.
+            if(text[0] == 'W')
+            {
+                width = GetValue(text);
+
+            }
+            else if(text[0] == 'H')
+            {
+                height = GetValue(text);
+            }
+            else
+            {
+                // run through the line and add it to an array
+                foreach(var character in text)
+                {
+                    characterList.Add(character);
+                }
+            }
+            Debug.Log(text);
+        }
+        while(text != null);
+
+        return characterList;
+    }
+
+
+    private int GetValue(string text)
+    {
+        var splitStr = text.Split(':');
+        var appendedStr = splitStr[1].Trim(' ');
+        return int.Parse(appendedStr);
+    }
+
+
+
+
+
+
+
 
 
 
